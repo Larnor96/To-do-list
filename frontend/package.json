@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Start-TodoApp.ps1",
+    "desktop": "powershell -NoProfile -ExecutionPolicy Bypass -STA -File scripts/TodoDesktop.ps1",
+    "install-startup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Install-Startup.ps1",
+    "install-desktop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Install-DesktopShortcut.ps1"
   },
   "dependencies": {
     "next": "16.1.6",

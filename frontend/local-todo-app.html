@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Local Todo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --background: #f6f4ee;
+        --text: #1f2933;
+        --muted: #5f6b77;
+        --line: #d9d2c3;
+        --line-strong: #cfc6b4;
+        --panel: #ffffff;
+        --primary: #273f3f;
+        --primary-soft: rgba(66, 107, 105, 0.16);
+        --danger: #8a3b2d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--background);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .app {
+        display: flex;
+        min-height: 100vh;
+        width: min(100%, 768px);
+        margin: 0 auto;
+        flex-direction: column;
+        padding: 32px 20px;
+      }
+
+      .header {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: #5f6f52;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        color: #16212d;
+        font-size: clamp(32px, 8vw, 44px);
+        line-height: 1.05;
+      }
+
+      .counter {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      .form {
+        display: flex;
+        gap: 12px;
+      }
+
+      .task-input {
+        min-width: 0;
+        flex: 1;
+        border: 1px solid var(--line-strong);
+        border-radius: 6px;
+        background: var(--panel);
+        padding: 13px 16px;
+        color: var(--text);
+        font-size: 16px;
+        outline: none;
+        box-shadow: 0 1px 2px rgba(31, 41, 51, 0.06);
+      }
+
+      .task-input:focus {
+        border-color: #426b69;
+        box-shadow: 0 0 0 4px var(--primary-soft);
+      }
+
+      .add-button,
+      .clear-button,
+      .delete-button {
+        border: 0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .add-button {
+        background: var(--primary);
+        color: #ffffff;
+        padding: 0 20px;
+      }
+
+      .add-button:hover {
+        background: #1f3333;
+      }
+
+      .list-wrap {
+        flex: 1;
+        margin-top: 24px;
+      }
+
+      .empty {
+        border: 1px dashed var(--line-strong);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.55);
+        color: #687481;
+        padding: 48px 20px;
+        text-align: center;
+      }
+
+      .task-list {
+        display: grid;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .task {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid #ded7ca;
+        border-radius: 6px;
+        background: var(--panel);
+        padding: 12px 16px;
+        box-shadow: 0 1px 2px rgba(31, 41, 51, 0.06);
+      }
+
+      .checkbox {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 auto;
+        accent-color: #426b69;
+      }
+
+      .task-text {
+        min-width: 0;
+        flex: 1;
+        overflow-wrap: anywhere;
+        font-size: 16px;
+      }
+
+      .task.done .task-text {
+        color: #7b858f;
+        text-decoration: line-through;
+      }
+
+      .delete-button {
+        background: transparent;
+        color: var(--danger);
+        padding: 9px 12px;
+      }
+
+      .delete-button:hover {
+        background: #f7e8e3;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24px;
+      }
+
+      .clear-button {
+        border: 1px solid var(--line-strong);
+        background: var(--panel);
+        color: #39434d;
+        padding: 10px 16px;
+      }
+
+      .clear-button:hover {
+        background: #f1eee7;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+      }
+
+      @media (max-width: 560px) {
+        .app {
+          padding: 24px 16px;
+        }
+
+        .header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .form {
+          flex-direction: column;
+        }
+
+        .add-button {
+          min-height: 46px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Local Todo</p>
+          <h1>Today's tasks</h1>
+        </div>
+        <p class="counter" id="counter">No open tasks</p>
+      </header>
+
+      <form class="form" id="task-form">
+        <label class="sr-only" for="task-input">New task</label>
+        <input
+          class="task-input"
+          id="task-input"
+          autocomplete="off"
+          placeholder="Add a task"
+        />
+        <button class="add-button" type="submit">Add</button>
+      </form>
+
+      <section class="list-wrap" aria-live="polite">
+        <div class="empty" id="empty">No tasks yet.</div>
+        <ul class="task-list" id="task-list"></ul>
+      </section>
+
+      <footer class="footer" id="footer" hidden>
+        <button class="clear-button" id="clear-completed" type="button">
+          Clear completed
+        </button>
+      </footer>
+    </main>
+
+    <script>
+      const storageKey = "local-todo-app.tasks";
+      const form = document.querySelector("#task-form");
+      const input = document.querySelector("#task-input");
+      const list = document.querySelector("#task-list");
+      const empty = document.querySelector("#empty");
+      const counter = document.querySelector("#counter");
+      const footer = document.querySelector("#footer");
+      const clearCompleted = document.querySelector("#clear-completed");
+
+      let tasks = loadTasks();
+
+      function loadTasks() {
+        try {
+          return JSON.parse(localStorage.getItem(storageKey)) || [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveTasks() {
+        localStorage.setItem(storageKey, JSON.stringify(tasks));
+      }
+
+      function renderTasks() {
+        const openTasks = tasks.filter((task) => !task.completed).length;
+        counter.textContent =
+          openTasks === 0
+            ? "No open tasks"
+            : `${openTasks} ${openTasks === 1 ? "open task" : "open tasks"}`;
+
+        empty.hidden = tasks.length > 0;
+        footer.hidden = !tasks.some((task) => task.completed);
+        list.innerHTML = "";
+
+        for (const task of tasks) {
+          const item = document.createElement("li");
+          item.className = `task${task.completed ? " done" : ""}`;
+
+          const checkbox = document.createElement("input");
+          checkbox.className = "checkbox";
+          checkbox.type = "checkbox";
+          checkbox.checked = task.completed;
+          checkbox.ariaLabel = `Mark ${task.text} som ${
+            task.completed ? "ikke ferdig" : "ferdig"
+          }`;
+          checkbox.addEventListener("change", () => {
+            task.completed = checkbox.checked;
+            saveTasks();
+            renderTasks();
+          });
+
+          const text = document.createElement("span");
+          text.className = "task-text";
+          text.textContent = task.text;
+
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "delete-button";
+          deleteButton.type = "button";
+          deleteButton.textContent = "Delete";
+          deleteButton.ariaLabel = `Delete ${task.text}`;
+          deleteButton.addEventListener("click", () => {
+            tasks = tasks.filter((currentTask) => currentTask.id !== task.id);
+            saveTasks();
+            renderTasks();
+          });
+
+          item.append(checkbox, text, deleteButton);
+          list.append(item);
+        }
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const text = input.value.trim();
+        if (!text) {
+          return;
+        }
+
+        tasks = [
+          {
+            id:
+              crypto.randomUUID?.() ||
+              `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            text,
+            completed: false,
+            createdAt: Date.now(),
+          },
+          ...tasks,
+        ];
+        input.value = "";
+        saveTasks();
+        renderTasks();
+      });
+
+      clearCompleted.addEventListener("click", () => {
+        tasks = tasks.filter((task) => !task.completed);
+        saveTasks();
+        renderTasks();
+      });
+
+      renderTasks();
+    </script>
+  </body>
+</html>
+
