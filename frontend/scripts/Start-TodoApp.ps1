@@ -1,6 +1,13 @@
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$appPath = Join-Path $projectRoot "scripts\TodoDesktop.ps1"
+$electronPath = Join-Path $projectRoot "node_modules\.bin\electron.cmd"
+$indexPath = Join-Path $projectRoot "out\index.html"
 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -STA -File `"$appPath`"" -WorkingDirectory $projectRoot
+Set-Location $projectRoot
+
+if (-not (Test-Path $indexPath)) {
+  npm.cmd run build
+}
+
+Start-Process -FilePath $electronPath -ArgumentList "." -WorkingDirectory $projectRoot

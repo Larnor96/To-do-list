@@ -1,12 +1,14 @@
 # Local Todo App
 
-This is a local todo app. The desktop app runs in its own Windows window and stores tasks in `%APPDATA%\LocalTodoApp\tasks.json`.
+This is a local Electron + React todo app. It opens as a normal Windows desktop app, works offline, and stores app data under `%APPDATA%\LocalTodoApp`.
 
-## Run The Desktop App
+## Run The App
 
 ```powershell
 npm.cmd run desktop
 ```
+
+The script builds the static React app if needed, then opens it in Electron.
 
 ## Put The App On The Desktop
 
@@ -25,10 +27,6 @@ npm.cmd run install-startup
 ```
 
 This adds `LocalTodoApp.cmd` to your Windows user Startup folder. The next time you sign in, the app starts automatically.
-
-## Offline HTML Version
-
-`local-todo-app.html` can still be opened directly from disk if you want the browser version.
 
 ## Next.js Development
 
